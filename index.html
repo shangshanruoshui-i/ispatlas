@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISP Atlas · 图像信号处理可视化系统</title>
+<link rel="stylesheet" href="css/style.css?v=9">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand" data-goto="overview">
+      <span class="logo">ISP·<em>Atlas</em></span>
+      <span class="sub">图像信号处理可视化系统</span>
+    </div>
+    <nav class="nav" id="main-nav">
+      <a data-page="overview" class="active">总览</a>
+      <a data-page="pipeline">ISP 流水线</a>
+      <a data-page="basics">基础算法库</a>
+      <a data-page="ai">深度学习图鉴</a>
+      <a data-page="resume">简历工程</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ================= 总览 ================= -->
+<main class="page visible" id="page-overview">
+  <div class="hero">
+    <span class="kicker">纯浏览器端 · 零依赖 · Canvas 实时计算</span>
+    <h1>从 <em>Bayer RAW</em> 到成图：<br>一条看得见、摸得着、调得动的图像信号流水线</h1>
+    <p class="lead">
+      ISP Atlas 把相机 ISP 的传统算法与深度学习前沿放在同一个系统里：
+      流水线页可以对每一级模块实时调参、逐级对比、计算 PSNR/SSIM；
+      基础算法库覆盖 12 类经典图像处理算子；深度学习图鉴用自绘结构图拆解 8 大领域 18 个代表模型。
+    </p>
+    <div class="stat-row">
+      <div class="stat"><b>10</b><span>流水线级模块</span></div>
+      <div class="stat"><b>12</b><span>基础算法 Demo</span></div>
+      <div class="stat"><b>18</b><span>深度学习模型</span></div>
+      <div class="stat"><b>8</b><span>研究领域</span></div>
+      <div class="stat"><b>0</b><span>运行时依赖</span></div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>流水线全景</h2>
+    <p>点击任意模块进入流水线页，直接查看与调节该级算法</p>
+  </div>
+  <div id="overview-flow"></div>
+
+  <div class="section-head">
+    <h2>系统特色</h2>
+  </div>
+  <div class="grid grid-3">
+    <div class="card">
+      <h3 style="font-family:var(--serif);margin-top:0">传感器级 RAW 模拟</h3>
+      <p style="font-size:13.5px;color:var(--ink-soft)">不依赖任何 RAW 文件：在浏览器里模拟 RGGB 马赛克采样、散粒/读出噪声、坏点与镜头阴影，让流水线处理「真实感」的输入，并支持上传自己的图片。</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--serif);margin-top:0">逐级可观测流水线</h3>
+      <p style="font-size:13.5px;color:var(--ink-soft)">每一级模块都可独立开关、独立调参，前后结果用对比滑块逐像素查看；最终输出与参考图实时计算 PSNR / SSIM——把「论文指标」变成可以亲手玩的东西。</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--serif);margin-top:0">自绘模型结构图</h3>
+      <p style="font-size:13.5px;color:var(--ink-soft)">深度学习图鉴的每张结构图（SID 的 U-Net、NAFNet 的 SimpleGate、Restormer 的通道注意力、可逆 ISP 的耦合块……）都由内置 SVG 渲染器按统一规范生成，而非截图。</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--serif);margin-top:0">传统 ↔ 深度 对照学习</h3>
+      <p style="font-size:13.5px;color:var(--ink-soft)">每个深度学习领域都配一张「传统算法近似效果示意」：用本系统的经典算法模拟该领域模型要解决的问题，先有直觉再看论文。</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--serif);margin-top:0">全部算法手写实现</h3>
+      <p style="font-size:13.5px;color:var(--ink-soft)">从去马赛克插值核、双边滤波、Canny 滞后连接到 SSIM 高斯窗，全部为原生 JavaScript 实现（约 1200 行），无 OpenCV、无第三方库——每一行都可审查。</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--serif);margin-top:0">面向工程与求职</h3>
+      <p style="font-size:13.5px;color:var(--ink-soft)">「简历工程」页给出可直接使用的研究路线图：数据集、参考仓库、训练预算（4090/3060 级）与简历条目写法。</p>
+    </div>
+  </div>
+</main>
+
+<!-- ================= ISP 流水线 ================= -->
+<main class="page" id="page-pipeline">
+  <div class="section-head" style="margin-top:6px">
+    <span class="kicker">交互实验</span>
+    <h2>ISP 流水线：RAW → 成图</h2>
+    <p>选择场景 → 运行流水线 → 点击任意一级查看该级前后对比并调参 → 观察最终 PSNR / SSIM</p>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <b style="font-size:13.5px">测试场景</b>
+      <div id="pipe-scene"></div>
+      <span style="flex:1"></span>
+      <button class="btn" id="pipe-run">▶ 运行流水线</button>
+      <button class="btn ghost" id="pipe-download">下载结果 PNG</button>
+    </div>
+  </div>
+  <div id="pipe-flow" style="margin:6px 0 2px"></div>
+  <div class="step-strip" id="pipe-chips"></div>
+  <div style="display:grid;grid-template-columns:minmax(340px,560px) 1fr;gap:22px;align-items:start" class="pipe-layout">
+    <div>
+      <div id="pipe-viewer"></div>
+      <p class="spin-note" style="margin-top:8px">左右拖动对比线查看处理前后</p>
+    </div>
+    <div>
+      <div class="note" id="pipe-stage-info" style="margin-top:0">点击上方任一级节点查看说明。</div>
+      <div id="pipe-controls"></div>
+      <div class="metric-row" id="pipe-metrics" style="margin-top:14px"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ================= 基础算法库 ================= -->
+<main class="page" id="page-basics">
+  <div class="section-head" style="margin-top:6px">
+    <span class="kicker">算法百科</span>
+    <h2>基础图像处理算法库</h2>
+    <p>12 类经典算子，全部实时在浏览器内计算 —— 切换场景观察不同算法在不同纹理上的行为差异</p>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <b style="font-size:13.5px">测试场景</b>
+      <div id="basics-scene"></div>
+    </div>
+  </div>
+  <div class="grid grid-2" id="basics-grid"></div>
+</main>
+
+<!-- ================= 深度学习图鉴 ================= -->
+<main class="page" id="page-ai">
+  <div class="section-head" style="margin-top:6px">
+    <span class="kicker">研究地图</span>
+    <h2>深度学习 ISP 与图像修复图鉴</h2>
+    <p>8 大领域 × 18 个代表模型：自绘结构图 + 逐模块解读 + 数据集/损失/指标 + 开源仓库。效果示意图由本系统内置传统算法近似生成（非模型真实输出），用于建立直觉。</p>
+  </div>
+  <div id="ai-content"></div>
+</main>
+
+<!-- ================= 简历工程 ================= -->
+<main class="page" id="page-resume">
+  <div class="section-head" style="margin-top:6px">
+    <span class="kicker">Roadmap</span>
+    <h2>简历工程：把这份系统变成项目经历</h2>
+    <p>推荐的 3~4 个月路线、单卡（4090/3060）可行的研究项目，以及简历条目写法</p>
+  </div>
+
+  <div class="card" style="margin-bottom:18px">
+    <h3 style="font-family:var(--serif);margin-top:0">阶段一（3~4 周）· 传统方向：复刻并超越本系统流水线</h3>
+    <ul class="explain-list">
+      <li>用 C++/Python 重写本系统的 10 级流水线，在 MIT-Adobe FiveK（5000 张 RAW + 专家修图）上以专家修图为 GT 批量评估；</li>
+      <li>对照参考实现：<a href="https://github.com/QiuJueqin/fast-openISP" target="_blank" rel="noopener">QiuJueqin/fast-openISP</a>、<a href="https://github.com/10x-Engineers/Infinite-ISP" target="_blank" rel="noopener">10x-Engineers/Infinite-ISP</a>、<a href="https://github.com/cruxopen/openISP" target="_blank" rel="noopener">cruxopen/openISP</a>；</li>
+      <li>加分项：C++/SIMD 或 CUDA 加速，报告 1080p 帧率；给去马赛克换成 Malvar-He-Cutler 核并做消融。</li>
+    </ul>
+  </div>
+
+  <div class="card" style="margin-bottom:18px">
+    <h3 style="font-family:var(--serif);margin-top:0">阶段二（4~6 周）· 深度方向：一个经典复现 + 一个改进点</h3>
+    <ul class="explain-list">
+      <li>路线 A（低照度）：<a href="https://github.com/cchen156/Learning-to-See-in-the-Dark" target="_blank" rel="noopener">SID</a> 复现 → 参考 <a href="https://github.com/megvii-research/PMN" target="_blank" rel="noopener">PMN</a> 引入噪声建模作为改进；</li>
+      <li>路线 B（通用修复）：<a href="https://github.com/megvii-research/NAFNet" target="_blank" rel="noopener">NAFNet</a> 在 SIDD 上复现到论文指标 → 换一个注意力/门控模块做消融；</li>
+      <li>路线 C（轻量化，3060 亦可）：<a href="https://github.com/MediaTek-NeuroPilot/mai21-learned-smartphone-isp" target="_blank" rel="noopener">Learned Smartphone ISP</a> 数据，训练受限参数量的模型，与厂商 ISP 输出对比。</li>
+    </ul>
+  </div>
+
+  <div class="card" style="margin-bottom:18px">
+    <h3 style="font-family:var(--serif);margin-top:0">阶段三（2~3 周）· 部署：把模型变成可交付的东西</h3>
+    <ul class="explain-list">
+      <li>ONNX → TensorRT 导出，FP16 / INT8 量化，报告精度损失与加速比；</li>
+      <li>把量化后的模型接到本系统：作为流水线中「降噪」级的一个可选后端（这就是一个完整的工程故事）。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3 style="font-family:var(--serif);margin-top:0">简历条目写法（示例模板）</h3>
+    <div class="note" style="font-family:Georgia,serif">
+      「独立实现 RAW→RGB 全流程 ISP（黑电平/坏点/AWB/去马赛克/CCM/Gamma/USM，C++/SIMD 优化至 1080p@45fps），在 MIT-Adobe FiveK 上系统消融；复现 NAFNet-S 于 SIDD 达到 PSNR 39.9（论文 40.0），提出 xx 改进 +0.2dB；TensorRT INT8 量化推理加速 3.1×，精度损失 0.05dB；另实现浏览器端实时 ISP 可视化系统（纯原生 JS，约 5000 行）用于算法验证与教学演示。」
+    </div>
+    <p style="font-size:13px;color:var(--muted)">本系统即可作为其中「可视化系统」的成品与算法验证工具。</p>
+  </div>
+</main>
+
+<footer class="footer">
+  ISP Atlas · 传统与深度学习图像信号处理可视化系统 · 纯前端零依赖实现<br>
+  各模型论文与开源仓库链接见「深度学习图鉴」；指标为论文自报数值，仅供学习参考
+</footer>
+
+<script src="js/imgproc.js?v=9"></script>
+<script src="js/utils.js?v=9"></script>
+<script src="js/archviz.js?v=9"></script>
+<script src="js/ai-data.js?v=9"></script>
+<script src="js/pipeline.js?v=9"></script>
+<script src="js/basics.js?v=9"></script>
+<script src="js/ai.js?v=9"></script>
+<script src="js/main.js?v=9"></script>
+</body>
+</html>
