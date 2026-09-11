@@ -8,11 +8,10 @@
     overview: { el: "page-overview", init: null },
     pipeline: { el: "page-pipeline", init: () => window.PipePage.init() },
     basics: { el: "page-basics", init: () => window.BasicsPage.init() },
-    ai: { el: "page-ai", init: () => window.AiPage.init() },
-    resume: { el: "page-resume", init: null }
+    ai: { el: "page-ai", init: () => window.AiPage.init() }
   };
 
-  const inited = { overview: true, resume: true };
+  const inited = { overview: true };
   let current = "overview";
 
   function show(page) {
