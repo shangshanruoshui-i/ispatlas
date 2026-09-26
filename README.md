@@ -23,6 +23,7 @@ python -m http.server 8931
 | **ISP 流水线** | 传感器 RAW 模拟（RGGB 马赛克 / 光谱串扰 / 色温偏移 / 读出噪声 / 坏点 / 镜头阴影）→ 黑电平 → 坏点校正 → AWB（3 种算法）→ 去马赛克（双线性 / 边缘自适应+色差平滑）→ 降噪（双边 / 中值）→ CCM → Gamma → USM 锐化 → 色彩增强。每级可开关、可调参、前后对比滑块，最终输出实时计算 PSNR / SSIM |
 | **基础算法库** | 灰度 / 直方图均衡 / CLAHE / 高斯 / 中值 / 双边 / 非局部均值 / Sobel-Laplacian / Canny / Otsu / 形态学 / 噪声与评估，共 12 个可交互 Demo |
 | **深度学习图鉴** | 8 大领域 × 18 个代表模型（SID / ELD / PMN / DnCNN / NAFNet / Restormer / DMCNN / AirNet / PromptIR / AdaIR / SwinIR / HAT / MIMO-UNet / Deep-ISP / Invertible-ISP / MAI Learned ISP / Zero-DCE / SCI / Retinexformer），自绘 SVG 结构图 + 逐模块解读 + 数据集/损失/指标 + 开源仓库 + 简历提示 |
+| **图形管线** | 计算机图形学渲染管线几何阶段：右手系 / 列向量 / 相机朝 −Z / NDC 深度 [−1,1] 四大约定贯穿，世界空间·相机空间·NDC·屏幕四视图同步演示，顶点全链路追踪（local→world→view→clip→NDC→px），M/V/P/P·V 实时矩阵，深度非线性曲线，透视/正交切换与真实图元裁剪 |
 
 ## 工程亮点（面试可讲）
 
@@ -40,12 +41,14 @@ ispatlas/
 ├── css/style.css     # 清爽雅致浅色主题（象牙白 + 鼠尾草绿）
 └── js/
     ├── imgproc.js    # 核心算法库（约 1200 行，全部手写）
+    ├── mat4.js       # 手写三维数学库（列主序 / 右手系 / OpenGL 约定）
     ├── utils.js      # 程序化测试场景 / 对比滑块 / 通用 UI
     ├── archviz.js    # 模型结构图 SVG 渲染器
     ├── ai-data.js    # 深度学习模型图鉴数据
     ├── pipeline.js   # ISP 流水线交互页
     ├── basics.js     # 基础算法 Demo 页
     ├── ai.js         # 深度学习图鉴页
+    ├── graphics.js   # 渲染管线·几何变换交互页（Canvas 2D 软渲染）
     └── main.js       # 导航路由与页面惰性初始化
 ```
 

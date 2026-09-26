@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ISP Atlas · 图像信号处理可视化系统</title>
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
 
@@ -19,6 +19,7 @@
       <a data-page="pipeline">ISP 流水线</a>
       <a data-page="basics">基础算法库</a>
       <a data-page="ai">深度学习图鉴</a>
+      <a data-page="graphics">图形管线</a>
     </nav>
   </div>
 </header>
@@ -31,13 +32,14 @@
     <p class="lead">
       ISP Atlas 把相机 ISP 的传统算法与深度学习前沿放在同一个系统里：
       流水线页可以对每一级模块实时调参、逐级对比、计算 PSNR/SSIM；
-      基础算法库覆盖 12 类经典图像处理算子；深度学习图鉴用自绘结构图拆解 8 大领域 18 个代表模型。
+      基础算法库覆盖 12 类经典图像处理算子；深度学习图鉴用自绘结构图拆解 8 大领域 18 个代表模型；
+      图形管线页把「局部坐标 → 世界 → 相机 → NDC → 屏幕」的几何阶段做成四个同步视图。
     </p>
     <div class="stat-row">
-      <div class="stat"><b>10</b><span>流水线级模块</span></div>
+      <div class="stat"><b>12</b><span>流水线级模块</span></div>
       <div class="stat"><b>12</b><span>基础算法 Demo</span></div>
       <div class="stat"><b>18</b><span>深度学习模型</span></div>
-      <div class="stat"><b>8</b><span>研究领域</span></div>
+      <div class="stat"><b>4</b><span>管线空间视图</span></div>
       <div class="stat"><b>0</b><span>运行时依赖</span></div>
     </div>
   </div>
@@ -136,18 +138,132 @@
   <div id="ai-content"></div>
 </main>
 
+<!-- ================= 图形管线 ================= -->
+<main class="page" id="page-graphics">
+  <div class="section-head" style="margin-top:6px">
+    <span class="kicker">计算机图形学</span>
+    <h2>渲染管线 · 几何变换</h2>
+    <p>从局部坐标到屏幕像素的完整旅程：四个视图同步演示同一条几何流水线，一个金色顶点陪你走完全程。拖动旋转、滚轮缩放，所有矩阵实时更新。</p>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+      <div style="flex:1;min-width:280px">
+        <b style="font-size:13.5px">本页约定（四条贯穿全部推导与演示）</b>
+        <div class="step-strip" style="margin:8px 0 4px">
+          <span class="chip active">右手系（x×y=z）</span>
+          <span class="chip active">列向量 v′ = M·v</span>
+          <span class="chip active">相机朝 −Z</span>
+          <span class="chip active">NDC 深度 [−1, 1]</span>
+        </div>
+        <p class="note" style="margin:6px 0 0">这套组合即经典 <b>OpenGL 管线约定</b>：列向量下连续变换从右往左作用；右手系配合朝 −Z 使相机空间「X 右、Y 上、Z 从屏幕指向观察者」；透视矩阵把 [−n, −f] 映射到 [−1, 1]。</p>
+      </div>
+      <table class="metrics" style="max-width:330px;margin-top:2px">
+        <tr><th>约定项</th><th>OpenGL</th><th>DirectX（常用）</th></tr>
+        <tr><td>坐标手性</td><td><b>右手系</b></td><td>左手系</td></tr>
+        <tr><td>向量约定</td><td><b>列向量 v′=Mv</b></td><td>行向量 v′=vM</td></tr>
+        <tr><td>NDC 深度</td><td><b>[−1, 1]</b></td><td>[0, 1]</td></tr>
+        <tr><td>相机前方</td><td><b>−Z</b></td><td>+Z</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="gfx-flow" style="margin:4px 0 16px"></div>
+
+  <div class="gfx-layout">
+    <div class="card">
+      <div class="panel-title">世界空间 <span class="panel-sub">第三方视角：拖动旋转 · 滚轮缩放（金色虚线 = 相机视锥体）</span></div>
+      <canvas id="gfx-world"></canvas>
+    </div>
+    <div class="gfx-side">
+      <div class="card">
+        <div class="panel-title">参数</div>
+        <div class="ctl-row" id="gfx-fov-row"><label>视场角 FOV</label><input type="range" id="gfx-fov" min="25" max="90" step="1" value="45"><span class="val" id="gfx-fov-val">45</span></div>
+        <div class="ctl-row" id="gfx-ortho-size-row" style="display:none"><label>正交范围</label><input type="range" id="gfx-ortho-size" min="1.5" max="6" step="0.1" value="2.6"><span class="val" id="gfx-ortho-size-val">2.6</span></div>
+        <div class="ctl-row"><label>近平面 near</label><input type="range" id="gfx-near" min="0.1" max="2" step="0.05" value="0.4"><span class="val" id="gfx-near-val">0.4</span></div>
+        <div class="ctl-row"><label>远平面 far</label><input type="range" id="gfx-far" min="4" max="24" step="0.5" value="9"><span class="val" id="gfx-far-val">9</span></div>
+        <div class="ctl-row"><label>模型 RotY</label><input type="range" id="gfx-ry" min="0" max="360" step="1" value="28"><span class="val" id="gfx-ry-val">28</span></div>
+        <div class="ctl-row"><label>模型 RotX</label><input type="range" id="gfx-rx" min="-80" max="80" step="1" value="14"><span class="val" id="gfx-rx-val">14</span></div>
+        <div class="ctl-row"><label>模型缩放</label><input type="range" id="gfx-scale" min="0.5" max="1.6" step="0.05" value="1"><span class="val" id="gfx-scale-val">1</span></div>
+        <div class="ctl-row" style="gap:16px">
+          <label class="switch"><input type="checkbox" id="gfx-ortho"> 正交投影</label>
+          <label class="switch"><input type="checkbox" id="gfx-spin"> 自动旋转</label>
+          <label class="switch"><input type="checkbox" id="gfx-frustum" checked> 显示视锥</label>
+        </div>
+      </div>
+      <div class="card" id="gfx-matrices"></div>
+    </div>
+  </div>
+
+  <div class="stage-cards">
+    <div class="card stage-card">
+      <div class="panel-title">② 相机空间（View）<span class="panel-sub">V·M·v</span></div>
+      <canvas id="gfx-view"></canvas>
+      <p class="stage-cap">相机被移到原点、朝 −Z 看：视锥就是原点伸向 −Z 的棱台。可见物体 z &lt; 0。</p>
+    </div>
+    <div class="card stage-card">
+      <div class="panel-title">③ 裁剪 / NDC 空间<span class="panel-sub">÷w</span></div>
+      <canvas id="gfx-ndc"></canvas>
+      <p class="stage-cap">透视除法把视锥棱台压成 [−1,1]³ 立方体；红点 = 越出裁剪空间、将被裁剪的顶点。</p>
+    </div>
+    <div class="card stage-card">
+      <div class="panel-title">④ 屏幕像素（Viewport）<span class="panel-sub">视口变换 + 真实裁剪</span></div>
+      <canvas id="gfx-screen"></canvas>
+      <p class="stage-cap">图元在裁剪空间做 Sutherland–Hodgman 裁剪后除 w、映射像素，y 翻转（画布 y 向下）。</p>
+    </div>
+  </div>
+
+  <div class="gfx-bottom">
+    <div class="card" id="gfx-trace"></div>
+    <div class="card">
+      <div class="panel-title">深度为什么非线性<span class="panel-sub">z<sub>ndc</sub> 随 z<sub>view</sub> 的映射</span></div>
+      <canvas id="gfx-depth" style="width:100%"></canvas>
+      <p class="note" style="margin:10px 0 0">透视矩阵的 z 列含 1/z 项：<b>近处斜率陡、远处平缓</b>——深度缓冲的精度集中在近处，远处容易 z-fighting；near 取得过小会指数级恶化。工程上常用 <b>reversed-Z + 浮点深度缓冲</b> 缓解（[0,1] 深度的 DirectX 上做 reversed-Z 更自然）。正交投影没有 ÷w，深度保持线性。</p>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>经典简答 · 逐题自测</h2>
+    <p>点击展开答案；每一条都能在本页的视图与矩阵里找到对应的可视化证据</p>
+  </div>
+  <div class="qa-list">
+    <details class="qa">
+      <summary>连续变换为什么写成 P·V·M·v？顺序能换吗？</summary>
+      <div class="qa-body">列向量右乘时矩阵从右往左作用：先 M 把物体从局部空间摆到世界空间，再 V 变换到相机空间，最后 P 投影到裁剪空间。矩阵乘法不满足交换律，顺序不可换——「先投影再旋转」得到的结果完全不同。若采用行向量约定（DirectX 常用），则写作 v·M·V·P，顺序镜像；<b>两种约定混用是变换结果出错的头号原因</b>。</div>
+    </details>
+    <details class="qa">
+      <summary>w 分量有什么用？为什么 w ≤ 0 必须裁剪？</summary>
+      <div class="qa-body">w 有两个职责：① <b>裁剪基准</b>——图元必须满足 −w ≤ x, y, z ≤ w（视锥的四棱锥不等式）；② <b>透视除法的分母</b>——x/w、y/w、z/w 把四棱锥压成 [−1,1]³ 立方体。透视矩阵第四行 (0,0,−1,0) 使 w = −z<sub>view</sub>，恰好携带「顶点离相机多远」的透视信息；w ≤ 0 意味着顶点在相机之后或无穷远，除法无几何意义，必须先裁剪。</div>
+    </details>
+    <details class="qa">
+      <summary>为什么 OpenGL 选右手系 + 相机朝 −Z？DirectX 的选择错了吗？</summary>
+      <div class="qa-body">没有对错，只有自洽。右手系下 x×y=z，与「相机空间 X 右、Y 上、Z 从屏幕指向观察者」配合，叉积求出的法线、CCW 绕序定义的正面全部自洽。DirectX 常用左手系 + 朝 +Z，等效于把世界镜像，投影矩阵随之换号——<b>只要公式与约定配套，渲染结果可以完全一致</b>。本页全部推导严格按 OpenGL 约定，若移植到 DirectX 需逐项镜像。</div>
+    </details>
+    <details class="qa">
+      <summary>透视投影和正交投影的矩阵差别到底在哪一行？</summary>
+      <div class="qa-body">在<b>第四行</b>和 z 列：透视矩阵第四行是 (0, 0, −1, 0)，使 w′ = −z<sub>view</sub> ≠ 常数，透视除法产生「近大远小」，平行线相交于消失点；z 列还带 1/z 项使深度非线性。正交投影第四行是 (0, 0, 0, 1)，w′ 恒为 1，除法是恒等运算——平行线保持平行，深度线性。切换本页「正交投影」开关可直观对比两个面板的形状与深度曲线。</div>
+    </details>
+    <details class="qa">
+      <summary>near 平面调小会发生什么？为什么？</summary>
+      <div class="qa-body">透视深度 z<sub>ndc</sub> = (f+n)/(f−n) + 2fn/((f−n)·z<sub>view</sub>)，n→0 时曲线在 near 附近斜率爆炸：深度缓冲的精度几乎全部堆在近处，远处两个表面深度值接近到无法区分，产生 z-fighting。near 应在「不切穿最近物体」前提下尽量取大。下方深度曲线拖动 near 滑块即可看到曲线越来越弯。</div>
+    </details>
+  </div>
+</main>
+
 <footer class="footer">
   ISP Atlas · 传统与深度学习图像信号处理可视化系统 · 纯前端零依赖实现<br>
   各模型论文与开源仓库链接见「深度学习图鉴」；指标为论文自报数值，仅供学习参考
 </footer>
 
-<script src="js/imgproc.js?v=10"></script>
-<script src="js/utils.js?v=10"></script>
-<script src="js/archviz.js?v=10"></script>
-<script src="js/ai-data.js?v=10"></script>
-<script src="js/pipeline.js?v=10"></script>
-<script src="js/basics.js?v=10"></script>
-<script src="js/ai.js?v=10"></script>
-<script src="js/main.js?v=10"></script>
+<script src="js/imgproc.js?v=11"></script>
+<script src="js/mat4.js?v=11"></script>
+<script src="js/utils.js?v=11"></script>
+<script src="js/archviz.js?v=11"></script>
+<script src="js/ai-data.js?v=11"></script>
+<script src="js/pipeline.js?v=11"></script>
+<script src="js/basics.js?v=11"></script>
+<script src="js/ai.js?v=11"></script>
+<script src="js/graphics.js?v=17"></script>
+<script src="js/main.js?v=12"></script>
 </body>
 </html>

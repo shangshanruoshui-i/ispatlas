@@ -8,7 +8,8 @@
     overview: { el: "page-overview", init: null },
     pipeline: { el: "page-pipeline", init: () => window.PipePage.init() },
     basics: { el: "page-basics", init: () => window.BasicsPage.init() },
-    ai: { el: "page-ai", init: () => window.AiPage.init() }
+    ai: { el: "page-ai", init: () => window.AiPage.init() },
+    graphics: { el: "page-graphics", init: () => window.GraphicsPage.init() }
   };
 
   const inited = { overview: true };

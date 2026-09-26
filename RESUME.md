@@ -17,9 +17,8 @@
 - 实现 **12 类经典算子交互 Demo**：直方图均衡 / CLAHE（tile + 裁剪限幅 + 双线性融合）、高斯 / 中值 / 双边 / 非局部均值滤波、Sobel / Laplacian、Canny（NMS + 双阈值滞后连接）、Otsu 自动阈值、形态学腐蚀膨胀开闭运算
 
 **深度学习方向：**
-- 构建 ISP / 图像修复**深度学习研究图鉴**：覆盖低照度 RAW 成像、图像降噪、联合去马赛克与降噪、All-in-One 盲修复、超分辨率、去模糊、端到端 / 可逆 ISP、低照度 sRGB 增强 **8 大领域 × 18 个代表模型**（SID、ELD、PMN、DnCNN、NAFNet、Restormer、DMCNN、AirNet、PromptIR、AdaIR、SwinIR、HAT、MIMO-UNet、Invertible-ISP、MAI Learned ISP、Zero-DCE、SCI、Retinexformer），每个模型含关键结构解读、数据集 / 损失函数 / 论文指标与开源仓库索引
-- 自研**统一规范的 SVG 模型结构图渲染器**（支持纵向块图 + 跳连弧线、横向流程链两种布局），为 U-Net 跳连、NAFNet SimpleGate / SCA、Restormer 通道维转置注意力、可逆 ISP 仿射耦合块等关键结构绘制结构图并逐模块讲解
-- 每个领域配套**"传统算法近似效果示意"**：用系统内置经典算法合成退化并恢复，建立"传统 ↔ 深度学习"对照学习视角
+- 理解图像复原与 ISP 方向的主流深度学习范式：以 DnCNN 的残差学习理解"预测噪声而非干净图"的训练范式；以 NAFNet 的 SimpleGate 与 SCA 理解无激活函数、无自注意力的高效修复骨干如何兼顾精度与速度；以 Restormer 的通道维转置注意力（MDTA）理解 Transformer 如何在保持线性复杂度下处理高分辨率图像；以 SID 的 RAW 打包输入 + U-Net 跳连理解低照度端到端成像的完整链路；以 PMN 的噪声建模联合优化理解"物理先验 + 数据驱动"如何在低照度降噪中互相增强
+- 跟进视觉前沿并思考迁移价值：SAM 3 的可提示概念分割（用短文本短语或示例框统一完成检测-分割-跟踪）、DINOv3 的自监督视觉基座（Gram anchoring 缓解长训练下稠密特征退化）、AdaIR 的频域挖掘与调制（不同退化在频域留下不同指纹），关注其表征学习与骨干设计思路向图像修复 / ISP 任务的迁移
 
 **工程与质量：**
 - 纯原生 JavaScript 实现全部算法（约 **3400 行，0 运行时依赖**），Canvas 像素级实时计算；通过浏览器自动化逐页实测，**定位并修复 6 个算法级缺陷**（Bayer 统计采样相位错误、线性域中间量化损失、浮点值索引 TypedArray、参数 scale 级联等），核心质量指标从 PSNR 9.8dB 修复至 **22.9dB**（全退化开启）
@@ -31,7 +30,7 @@
 **ISP Atlas——图像信号处理可视化系统**（JavaScript / Canvas / SVG，零依赖，约 3400 行）
 - 独立实现 12 级 RAW→RGB ISP 流水线（BLC / 坏点 rail 检测 / LSC / AWB×3 / 边缘自适应去马赛克+色差平滑 / 双边降噪 / CCM 严格逆 / Gamma / USM），每级可开关调参、对比查看，PSNR/SSIM（手写高斯窗实现）实时评估
 - 构建物理正确的传感器 RAW 模拟管线（光谱串扰 / 色温偏移 / 读出噪声 / 渐晕），全程线性域 Float32 传递，8-bit 量化仅存在于 Gamma 编码后
-- 实现 12 类经典算子交互库（CLAHE / 双边 / NLM / Canny / Otsu / 形态学等）与 8 大领域 × 18 个深度学习模型研究图鉴，自研 SVG 结构图渲染器绘制 SID / NAFNet / Restormer / Invertible-ISP 等模型结构
+- 熟悉图像修复与 ISP 深度学习范式并具备论文复现能力（DnCNN / NAFNet / Restormer / DMCNN / AirNet / PromptIR / SID / ELD / PMN），持续跟进视觉前沿（SAM 3 概念分割、DINOv3 自监督基座），自研 SVG 结构图渲染器完成模型结构可视化
 - 浏览器自动化实测自审，修复 6 个算法级缺陷（采样相位 / 量化 / 浮点索引等），指标 9.8dB → 22.9dB
 
 ---
